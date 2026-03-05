@@ -1,25 +1,36 @@
-// Clase que gestiona los usuarios obtenidos desde el endpoint
+// ========================================
+// Clase UsersService
+// Gestión de usuarios desde endpoint
+// ========================================
+
 class UsersService {
 
     constructor() {
-        // Propiedad donde almacenaremos los usuarios
+        // Propiedad donde se almacenarán los usuarios
         this.users = [];
     }
 
-    // Método para inicializar la carga de datos
+    // ========================================
+    // Método para inicializar datos con fetch
+    // ========================================
     async init() {
         try {
             const response = await fetch('https://jsonplaceholder.typicode.com/users');
             const data = await response.json();
+
             this.users = data;
-            console.log("Usuarios cargados correctamente");
+
+            this.print("✅ Usuarios cargados correctamente.");
+
         } catch (error) {
             console.error("Error al obtener los datos:", error);
-            print("Error al cargar los usuarios.");
+            this.print("❌ Error al cargar los usuarios.");
         }
     }
 
-    // Método auxiliar para mostrar datos en pantalla
+    // ========================================
+    // Método auxiliar para imprimir resultados
+    // ========================================
     print(data) {
         const out = document.getElementById('output');
         out.textContent = (typeof data === 'string')
@@ -27,20 +38,38 @@ class UsersService {
             : JSON.stringify(data, null, 2);
     }
 
+    // ========================================
+    // Método auxiliar para buscar usuario
+    // Ignora mayúsculas y minúsculas
+    // ========================================
+    buscarUsuarioPorNombre(nombreIngresado) {
+
+        if (!nombreIngresado) return null;
+
+        return this.users.find(user =>
+            user.name.toLowerCase() === nombreIngresado.toLowerCase()
+        );
+    }
+
+    // ========================================
     // a) Listar nombres
+    // ========================================
     listarNombres() {
         const nombres = this.users.map(user => user.name);
         this.print(nombres);
     }
 
-    // b) Mostrar info básica por nombre
+    // ========================================
+    // b) Info básica por nombre
+    // ========================================
     mostrarInfoBasicaPorNombre() {
-        const nombre = prompt("Ingrese el nombre exacto del usuario:");
 
-        const usuario = this.users.find(u => u.name === nombre);
+        const nombre = prompt("Ingrese el nombre del usuario:");
+
+        const usuario = this.buscarUsuarioPorNombre(nombre);
 
         if (!usuario) {
-            this.print("Usuario no encontrado.");
+            this.print("❌ Usuario no encontrado.");
             return;
         }
 
@@ -50,28 +79,40 @@ class UsersService {
         });
     }
 
-    // c) Mostrar dirección por nombre
+    // ========================================
+    // c) Dirección por nombre
+    // ========================================
     mostrarDireccionPorNombre() {
-        const nombre = prompt("Ingrese el nombre exacto del usuario:");
 
-        const usuario = this.users.find(u => u.name === nombre);
+        const nombre = prompt("Ingrese el nombre del usuario:");
+
+        const usuario = this.buscarUsuarioPorNombre(nombre);
 
         if (!usuario) {
-            this.print("Usuario no encontrado.");
+            this.print("❌ Usuario no encontrado.");
             return;
         }
 
-        this.print(usuario.address);
+        this.print({
+            street: usuario.address.street,
+            suite: usuario.address.suite,
+            city: usuario.address.city,
+            zipcode: usuario.address.zipcode,
+            geo: usuario.address.geo
+        });
     }
 
-    // d) Mostrar info avanzada por nombre
+    // ========================================
+    // d) Info avanzada por nombre
+    // ========================================
     mostrarInfoAvanzadaPorNombre() {
-        const nombre = prompt("Ingrese el nombre exacto del usuario:");
 
-        const usuario = this.users.find(u => u.name === nombre);
+        const nombre = prompt("Ingrese el nombre del usuario:");
+
+        const usuario = this.buscarUsuarioPorNombre(nombre);
 
         if (!usuario) {
-            this.print("Usuario no encontrado.");
+            this.print("❌ Usuario no encontrado.");
             return;
         }
 
@@ -82,8 +123,11 @@ class UsersService {
         });
     }
 
+    // ========================================
     // e) Listar compañías y catchPhrase
+    // ========================================
     listarCompaniasYCatchphrase() {
+
         const companias = this.users.map(user => ({
             company: user.company.name,
             catchPhrase: user.company.catchPhrase
@@ -92,8 +136,11 @@ class UsersService {
         this.print(companias);
     }
 
-    // f) Listar nombres ordenados alfabéticamente
+    // ========================================
+    // f) Listar nombres ordenados
+    // ========================================
     listarNombresOrdenados() {
+
         const ordenados = this.users
             .map(user => user.name)
             .sort((a, b) => a.localeCompare(b));
@@ -103,12 +150,13 @@ class UsersService {
 }
 
 
-// ==============================
+// ========================================
 // INSTANCIA Y EVENTOS
-// ==============================
+// ========================================
 
 const svc = new UsersService();
 
+// Se inicializan los datos y luego se activan los botones
 svc.init().then(() => {
 
     document.getElementById('btnNombres')
